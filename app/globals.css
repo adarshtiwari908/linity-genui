@@ -1,0 +1,127 @@
+@import 'tailwindcss';
+@import '@fontsource-variable/cairo';
+
+@custom-variant dark (&:is(.dark *));
+
+/* ---------------------------------------------------------------------------
+   Linity design tokens. These are the real brand colours + Cairo type used
+   across the Linity product. You should not need to touch these — build with
+   the semantic classes (bg-card, text-muted-foreground, border-border, etc.)
+   and the `lime` accent, and everything stays on-brand automatically.
+--------------------------------------------------------------------------- */
+
+:root {
+    --radius: 0.5rem;
+
+    --background: #f1f8fe;
+    --foreground: #28333a;
+    --card: #ffffff;
+    --card-foreground: #28333a;
+    --popover: #ffffff;
+    --popover-foreground: #28333a;
+    --primary: #28333a;
+    --primary-foreground: #e4f1fd;
+    --secondary: #f1f8fe;
+    --secondary-foreground: #28333a;
+    --muted: #e4f1fd;
+    --muted-foreground: #778f9b;
+    --accent: #adc1c7;
+    --accent-foreground: #28333a;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #c9d9e2;
+    --input: #c9d9e2;
+    --ring: #ddde59;
+
+    --lime: #ddde59;
+    --lime-hover: #e9ec9c;
+
+    --chart-1: #4d9de0;
+    --chart-2: #e0a34d;
+    --chart-3: #de59a4;
+    --chart-4: #59a45a;
+    --chart-5: #7a5cff;
+}
+
+.dark {
+    --background: #1a1f23;
+    --foreground: #f1f8fe;
+    --card: #28333a;
+    --card-foreground: #f1f8fe;
+    --popover: #28333a;
+    --popover-foreground: #f1f8fe;
+    --primary: #c9d9e2;
+    --primary-foreground: #28333a;
+    --secondary: #28333a;
+    --secondary-foreground: #e4f1fd;
+    --muted: #343f45;
+    --muted-foreground: #9db2bd;
+    --accent: #496571;
+    --accent-foreground: #f1f8fe;
+    --destructive: #ef4444;
+    --destructive-foreground: #ffffff;
+    --border: #3a4950;
+    --input: #3a4950;
+    --ring: #ddde59;
+
+    --lime: #ddde59;
+    --lime-hover: #e9ec9c;
+
+    --chart-1: #ddde59;
+    --chart-2: #59dedd;
+    --chart-3: #de59a4;
+    --chart-4: #a4de59;
+    --chart-5: #de9a59;
+}
+
+@theme inline {
+    --font-sans: 'Cairo Variable', system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+    --radius-sm: calc(var(--radius) - 4px);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-lg: var(--radius);
+    --radius-xl: calc(var(--radius) + 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-lime: var(--lime);
+    --color-lime-hover: var(--lime-hover);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+}
+
+@layer base {
+    * {
+        border-color: var(--border);
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        -webkit-font-smoothing: antialiased;
+    }
+}

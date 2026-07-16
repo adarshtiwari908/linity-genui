@@ -2,52 +2,38 @@
 
 ## What I built
 
-A full generative-UI feature that lets the assistant answer board-game questions with an **interactive table + linked charts** instead of prose. When a user asks something like _"show me co-op games under 90 minutes, highest rated first"_, the model calls `queryGames`, and the chat renders a `GamesExplorer` component with:
+I built a generative UI feature so the assistant can answer board game questions with an actual interactive table and charts instead of just replying with text. So if someone asks something like "show me co-op games under 90 minutes, highest rated first" the model calls a queryGames tool and the chat shows a games explorer with a table you can sort, filter and page through, plus two charts made with recharts that update with the same filtered data. I also added hovering a table row to highlight its dot on the scatter chart and the other way around, a way to select rows and ask the assistant to summarize them, a button to download the filtered games as CSV, and toggles to hide or show table columns. Loading, empty and error states are handled for both the table and the charts. The weather card example still works fine alongside all this.
 
-- A **sortable, filterable, paginated table** of matching games.
-- A **category bar chart** and a **rating-vs-complexity scatter plot** (Recharts), both driven by the same filtered data.
-- **Cross-highlighting**: hovering a table row highlights its dot in the scatter chart.
-- Proper **loading skeleton**, **empty state**, and **error state**.
-- **Interactive row selection**: Selecting rows reveals a sticky action bar at the bottom to "Summarize" the selected games, sending a message back to the AI.
-- **CSV Export**: A "Download CSV" button instantly generates and downloads the filtered dataset.
-- **Column Toggles**: Badges in the header allow the user to dynamically hide/show any column (except Name).
-- **Two-way cross-highlighting**: Hovering a table row highlights its dot in the scatter chart, and hovering a dot in the scatter chart highlights its table row.
+## Decisions and trade-offs
 
-The weather card example continues to work alongside it.
+I made every filter in the tool optional so the model can mix and match them freely, like "strategy games for 2 players under an hour." I added short descriptions to each field so the model understands what they mean. By default it sorts by rating high to low since that felt like what most people want first.
 
-## Decisions & trade-offs
+Filtering happens in two places. The model applies the structured filters like category, players, time, rating and complexity on the server. Then I added a text search box on the client so users can refine further without waiting on the model again. That box searches across name, category and year.
 
-**Tool schema design.** I made every filter optional so the model can combine them freely ("strategy games for 2 players under an hour"). The schema uses descriptive `.describe()` annotations so the model understands each parameter. I default to sorting by rating descending — that's usually what people care about first.
+For charts I went with two, a bar chart showing count by category and a scatter plot of rating versus complexity. The bar chart gives a quick sense of how many games are in each category, and the scatter answers a natural follow-up question of whether harder games actually rate higher. I also used bubble size to show play time as a third value on the scatter.
 
-**Two-level filtering.** The model applies structured filters server-side (category, player count, play time, rating, complexity), and the client adds a text filter on top. This gives the user immediate, no-round-trip refinement after the initial query. The text filter searches across name, category, and year.
+Instead of cross-filtering between the chart and table I went with cross-highlighting, hovering a row lights up its dot and hovering a dot lights up its row. Felt more natural for this size of data since it keeps everything visible instead of hiding rows.
 
-**Dual charts.** I chose a category bar chart + a rating-vs-complexity scatter rather than a single chart. The bar chart quickly shows distribution, while the scatter reveals whether "more complex" actually means "higher rated" — a natural question when browsing games. Bubble size encodes play time as a third dimension.
+Pagination is set to 8 rows per page. The full dataset is 36 games and most filtered results come back under 15, so 8 keeps the card compact but still useful, and results with just a few matches don't get weird pagination.
 
-**Cross-highlighting over cross-filtering.** Highlighting (hover a row → highlight its scatter dot) felt more natural than cross-filtering for this dataset size. It keeps context visible rather than hiding data, which matters when there are only a handful of results.
+For styling I stuck to the components already provided and the design tokens like bg-card, text-muted-foreground, border-border, the lime accent and the chart tokens. No hand-picked colors and no outside libraries.
 
-**Pagination at 8 rows.** The full dataset is 36 games, and filtered results are usually <15. 8 per page keeps the card compact inside the chat while still showing enough context. With 3 co-op results, there's no pagination noise.
+## If I had run out of time
 
-**On-brand styling.** Used only the provided `components/ui/` library and semantic design tokens (`bg-card`, `text-muted-foreground`, `border-border`, `lime` accent, `chart-1`–`chart-5`). No custom colours or external component libraries.
+The brief said to stop and say what I'd do next if the time cap hit, so here is roughly how I would have prioritized if I had less room to work with. The queryGames tool and wiring it into the chat route would come first since nothing else works without it. Next would be the plain table with sorting and the text filter, since that alone answers the core ask. After that the loading, empty and error states, since those are explicitly asked for and a missing state is a visible gap. The chart would come after the table is solid, since the table alone can already answer most questions on its own. Everything past that, cross-highlighting, CSV export, column toggles, row selection and summarize, is stretch, and I would have cut all of it first before touching the core loop, table, or states. In the end I had enough time to get through the stretch goals too, but if the cap had hit earlier that is the order I would have dropped things in.
 
-## What I cut for time / would do next
+## What I cut for time
 
-With another day I'd add:
-
-- **Animated transitions**: smoother page transitions in the table (fade-in rows), and animate the charts when filter changes.
-- **Accessibility audit**: proper `aria-sort` on table headers, keyboard navigation for pagination, screen-reader labels on chart elements.
-- **More chart types**: a toggle between bar/scatter/radar, or a mini sparkline in each table row showing how the game's rating compares to its category average.
-- **Agent Memory**: Incorporate memory solutions like **Almanac** or **Supermemory** for agents to remember context across sessions, which is crucial for building a production-level, personalized generative UI experience.
+With more time I would add small animations, like rows fading in and charts animating when filters change. I would also do a real accessibility pass, proper aria-sort on the table headers, keyboard support for pagination, and labels for screen readers on the chart parts. Another idea is more chart types, maybe a toggle between bar, scatter and radar, or a small sparkline per row comparing a game's rating to its category average.
 
 ## How I used AI
 
-I used **Antigravity (Gemini-powered AI coding assistant)** for the entire implementation. Here's how:
+I used Antigravity mainly to speed up the boring parts, writing out the recharts setup, connecting the tool's output types to the components, and some of the repetitive filter and sort logic. The actual decisions, what filters to expose, which two charts to use, how pagination should behave, and the highlighting approach, were mine, I just had it type faster once I knew what I wanted.
 
-- **What I delegated**: I delegated the scaffolding of the `queryGames` tool schema, the `GamesExplorer` component, the Recharts chart setup, and wiring everything into `chat.tsx`. The AI handled the boilerplate of connecting tool output types, setting up Recharts `ResponsiveContainer`, and writing the filter/sort logic.
+One thing it got wrong was the model name. It first tried a model that returned a 404 saying it was no longer available for new users, then tried another one that also failed. I ended up checking which models were actually available for my API key and picked the one that worked reliably instead of just trusting the first fix.
 
-- **One thing it got wrong**: The AI initially tried to use `gemini-2.5-flash-lite` as the model, which returned a 404 error ("no longer available to new users"). It then tried `gemini-3.5-flash` and `gemini-2.5-flash` — both also failed. I had to systematically test models by listing available ones via the API and found that `gemini-3-flash-preview` worked, while the production `gemini-3.5-flash` had intermittent 503s. I manually chose to go with `gemini-3.5-flash` since it's the latest stable model and the 503s were transient.
+A place I overrode it was when it just swapped the model string without actually checking if it worked. I made it go back and actually hit the endpoint and read the server logs instead of assuming a string replace was enough, which is what led to finding the real problem.
 
-- **A place I overrode its suggestion**: The AI initially only replaced the model string in `route.ts` without checking whether the model actually worked. I pushed it to actually verify by hitting the API endpoint and reading the server logs, which led to discovering the real issue (new-user model restrictions vs. rate limits). This changed the debugging approach from "find-and-replace a string" to "systematically test which models are available for this API key."
+## Where to look first
 
-## Anything you want us to look at first
-
-Start with `components/tools/games-explorer.tsx` — it's where the most judgment lives: the table/chart layout, cross-highlighting, dual-chart choice, and the interaction between server-side and client-side filtering. Then look at the `queryGames` tool schema in `lib/tools.ts` to see how the input contract drives everything.
+Start with the games explorer component, that is where most of the actual thinking is, the table and chart layout, the highlighting, and how server-side and client-side filtering work together. After that look at the queryGames tool in lib/tools.ts to see how the input shape drives everything else.
